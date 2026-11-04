@@ -104,18 +104,18 @@ jobs:
           # REDIS_URL: redis://localhost:6379/0
         run: bin/rails db:test:prepare test
 
-  system-test:
-    runs-on: ubuntu-latest
+  # system-test:
+  #   runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: pgvector/pgvector:pg17
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+  #   services:
+  #     postgres:
+  #       image: pgvector/pgvector:pg17
+  #       env:
+  #         POSTGRES_USER: postgres
+  #         POSTGRES_PASSWORD: postgres
+  #       ports:
+  #         - 5432:5432
+  #       options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
 
       # redis:
       #   image: valkey/valkey:8

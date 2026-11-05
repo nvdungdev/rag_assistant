@@ -35,3 +35,4 @@
 /config/credentials/*.key
 /PLAN.md
 
+data/guides/

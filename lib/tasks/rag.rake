@@ -31,4 +31,16 @@ namespace :rag do
 
     puts "Done: #{stats.inspect}. Total documents: #{Document.count}"
   end
+
+  desc "Preview sections of a guide: rake 'rag:preview[active_record_basics.md]'"
+  task :preview, [ :file ] => :environment do |_, args|
+    path = Rails.root.join("data/guides", args[:file])
+    md = File.read(path)
+    sections = Rag::SectionSplitter.call(md)
+
+    sections.each do |s|
+      puts format("%5d  %-60s  %s", s.text.size, s.heading_path.truncate(60), s.text[0, 70].tr("\n", " "))
+    end
+    puts "--- #{sections.size} sections, #{sections.sum { _1.text.size }} / #{md.size} chars in file"
+  end
 end

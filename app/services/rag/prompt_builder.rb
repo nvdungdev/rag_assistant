@@ -37,8 +37,9 @@ module Rag
     end
 
     # Match the whole reply, so an answer that merely mentions the token is not treated as a refusal.
+
     def no_answer?(text)
-      text.to_s.strip.delete(".") == NO_ANSWER_TOKEN
+      text.to_s.include?(NO_ANSWER_TOKEN)
     end
 
     private

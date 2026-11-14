@@ -56,7 +56,7 @@ module Rag
       body = post("/api/chat", payload, read_timeout: @chat_read_timeout)
 
       ChatResult.new(
-        content: body.dig("message", "content").to_s,
+        content: body.dig("message", "content").to_s.strip,
         done_reason: body["done_reason"],
         prompt_tokens: body["prompt_eval_count"],
         output_tokens: body["eval_count"]

@@ -125,4 +125,37 @@ namespace :rag do
 
     puts "--- #{Document.count} documents, #{total} chunks (Chunk.count = #{Chunk.count})"
   end
+
+  desc "Embed chunks that have no embedding yet (resumable). Options: LIMIT=n, BATCH=n"
+  task embed: :environment do
+    batch_size = Integer(ENV.fetch("BATCH", 16))
+
+    scope = Chunk.where(embedding: nil).order(:id)
+    scope = scope.limit(Integer(ENV["LIMIT"])) if ENV["LIMIT"]
+    ids = scope.pluck(:id)
+    total = ids.size
+    puts "chunks to embed: #{total}"
+
+    client = Rag::OllamaClient.new
+    clock = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
+    started = clock.call
+    done = 0
+
+    ids.each_slice(batch_size) do |batch_ids|
+      t0 = clock.call
+
+      # Same order as batch_ids (ids are already sorted ascending).
+      chunks = Chunk.where(id: batch_ids).order(:id).to_a
+      vectors = client.embed(chunks.map(&:embedding_text))
+
+      Chunk.transaction do
+        chunks.zip(vectors).each { |chunk, vector| chunk.update_columns(embedding: vector) }
+      end
+
+      done += chunks.size
+      puts "#{done}/#{total} (batch #{(clock.call - t0).round(1)}s, elapsed #{(clock.call - started).round}s)"
+    end
+
+    puts "done in #{(clock.call - started).round}s"
+  end
 end

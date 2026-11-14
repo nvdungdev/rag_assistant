@@ -1,0 +1,30 @@
+- question: "Hai cấu hình bắt buộc khi dùng Action Cable là gì?"
+  source_path: action_cable_overview.md
+  position: 33
+
+- question: "Làm sao cho phép client từ domain khác kết nối vào cable server?"
+  source_path: action_cable_overview.md
+  position: 40
+
+- question: "Dùng Redis làm subscription adapter thì cấu hình ở đâu?"
+  source_path: action_cable_overview.md
+  position: 34
+
+- question: "Làm sao chỉ chạy validation khi một điều kiện nào đó đúng?"
+  source_path: active_record_validations.md
+  position: 48
+
+- question: "Làm sao viết một validator tùy chỉnh để dùng lại cho nhiều model?"
+  source_path: active_record_validations.md
+  position: 55
+- question: "Làm sao hiển thị thông báo lỗi validation trên form cho người dùng?"
+  source_path: active_record_validations.md
+  position: 70
+
+- question: "Làm sao khai báo route cho nhiều resource cùng lúc mà không phải viết lặp?"
+  source_path: routing.md
+  position: 11
+
+- question: "Làm sao để URL /articles (không có tiền tố /admin) trỏ tới controller nằm trong module Admin?"
+  source_path: routing.md
+  position: 15

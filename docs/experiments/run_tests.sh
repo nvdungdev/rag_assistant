@@ -7,7 +7,7 @@ QUESTIONS=(
   "C|Django ORM dùng migration thế nào?"
 )
 RUNS=2
-OUT=/tmp/test_results.txt
+OUT=docs/experiments/test_results_rerun.txt
 : > "$OUT"
 
 for item in "${QUESTIONS[@]}"; do
@@ -15,7 +15,7 @@ for item in "${QUESTIONS[@]}"; do
   q="${item#*|}"
   for run in $(seq 1 "$RUNS"); do
     echo "=== Case $label, run $run: $q" | tee -a "$OUT"
-    jq -n --rawfile ctx /tmp/ctx.txt --rawfile sys /tmp/sys.txt --arg q "$q" '{
+    jq -n --rawfile ctx docs/experiments/ctx.txt --rawfile sys docs/experiments/sys_v2.txt --arg q "$q" '{
       model: "qwen3:1.7b", stream: false, think: false, keep_alive: "10m",
       options: { num_ctx: 4096, temperature: 0.2, num_predict: 300 },
       messages: [

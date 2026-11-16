@@ -79,8 +79,37 @@ A `[debug]` line is printed to stderr with `top1_distance`, token counts and ela
 
 ### Docker Compose
 
-TODO: fill in after the Compose setup is verified on a clean machine
-(Ollama on the host vs. an `ollama` service, how models are pulled, how the database is seeded).
+Requirements: Docker with Compose v2.24+ (check with `docker compose version`).
+Give Docker enough RAM for the chat model (TODO: your measured number; the model alone needs about 2.5 GB).
+
+Restore the pre-embedded database first (the dump contains the 2110 embedded chunks),
+so you do not have to run the embedding step on CPU:
+
+```bash
+docker compose up -d db
+docker compose exec -T db createdb -U rag rag_assistant_development
+docker compose exec -T db pg_restore -U rag -d rag_assistant_development --no-owner < db/dumps/rag_dev.dump
+```
+
+Start everything and pull the models (about 2.6 GB download, stored in the `ollama` volume):
+
+```bash
+docker compose up -d --build
+docker compose exec ollama ollama pull bge-m3
+docker compose exec ollama ollama pull qwen3:1.7b
+```
+
+Ask a question:
+
+```bash
+docker compose exec web bin/rails rag:ask Q="Làm sao để validate uniqueness theo scope trong Active Record?"
+```
+
+Notes:
+- Compose uses `Dockerfile.dev`. The root `Dockerfile` is the Rails production image and is not used here.
+- Ports are bound to `127.0.0.1` only, and Ollama is not published to the host. The database credentials (`rag`/`rag`) are for local demo use only.
+- `docker compose down -v` deletes the database volume. Restore the dump again afterwards.
+- The dump is derived from the Rails Guides (CC BY-SA 4.0), see License and attribution below.
 
 ## Measurements
 

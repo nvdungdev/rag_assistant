@@ -158,4 +158,32 @@ namespace :rag do
 
     puts "done in #{(clock.call - started).round}s"
   end
+  desc "Ask a question: bin/rails rag:ask Q='your question' [K=5]"
+  task ask: :environment do
+    question = ENV["Q"].to_s.strip
+    abort "Usage: bin/rails rag:ask Q='your question' [K=5]" if question.empty?
+
+    k = Integer(ENV.fetch("K", Rag::Retriever::DEFAULT_K))
+    builder = Rag::PromptBuilder.new
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+    results = Rag::Retriever.new(k: k).call(question)
+    reply = Rag::OllamaClient.new.chat(builder.build(question, results))
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+
+    if builder.no_answer?(reply.content)
+      puts Rag::PromptBuilder::NO_ANSWER_MESSAGE
+    else
+      puts reply.content
+      puts
+      puts "Retrieved from:"
+      puts builder.sources(results)
+      warn "[warning] answer was cut off (num_predict reached)" if reply.truncated?
+    end
+
+    warn format("[debug] top1_distance=%.3f prompt_tokens=%s output_tokens=%s time=%.1fs",
+                results.first&.distance.to_f, reply.prompt_tokens, reply.output_tokens, elapsed)
+  rescue Rag::OllamaClient::Error, ArgumentError => e
+    abort "Error: #{e.message}"
+  end
 end

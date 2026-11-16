@@ -5,12 +5,21 @@ services:
       POSTGRES_USER: rag
       POSTGRES_PASSWORD: rag
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U rag"]
       interval: 5s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
       retries: 10
 
   web:
@@ -19,17 +28,22 @@ services:
       dockerfile: Dockerfile.dev
       args:
         RUBY_VERSION: "3.4.1"
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_USER: rag
       DB_PASSWORD: rag
+      OLLAMA_URL: http://ollama:11434
       RAILS_ENV: development
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       db:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     volumes:
       - .:/rails
@@ -37,4 +51,5 @@ services:
 
 volumes:
   pgdata:
+  ollama:
   bundle_cache:
